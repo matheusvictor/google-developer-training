@@ -14,7 +14,9 @@ class GameViewModel : ViewModel() {
     private lateinit var _currentScrambledWord: String
     val currentScrambleWord: String get() = _currentScrambledWord
 
-    lateinit var currentWord: String
+    private lateinit var _currentWord: String
+    val currentWord: String get() = _currentWord
+
     private var wordList: MutableList<String> = mutableListOf()
 
     init {
@@ -28,22 +30,22 @@ class GameViewModel : ViewModel() {
     }
 
     private fun getNextWord() {
-        currentWord = allWordsList.random()
+        _currentWord = allWordsList.random()
 
-        val tempWord = currentWord.toCharArray()
+        val tempWord = _currentWord.toCharArray()
         tempWord.shuffle()
-        while (tempWord.toString().equals(currentWord, false)) {
+        while (String(tempWord).equals(_currentWord, false)) {
             tempWord.shuffle()
         }
-        if (wordList.contains(currentWord)) getNextWord()
+        if (wordList.contains(_currentWord)) getNextWord()
         else {
-            _currentScrambledWord = tempWord.toString()
+            _currentScrambledWord = String(tempWord)
             ++_currentWordCount
-            wordList.add(currentWord)
+            wordList.add(_currentWord)
         }
     }
 
-    private fun canSkipToNextWord(): Boolean {
+    fun canSkipToNextWord(): Boolean {
         return if (currentWordCount < MAX_NO_OF_WORDS) {
             getNextWord()
             true
