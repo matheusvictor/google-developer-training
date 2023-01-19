@@ -75,7 +75,9 @@ class GameFragment : Fragment() {
     * Displays the next scrambled word.
     */
     private fun onSubmitWord() {
-        //TODO
+        if (gameViewModel.canSkipToNextWord()) {
+            updateNextWordOnScreen()
+        } else showFinalScoreDialog()
     }
 
     /*
@@ -83,7 +85,7 @@ class GameFragment : Fragment() {
      * Increases the word count.
      */
     private fun onSkipWord() {
-        //TODO
+        onSubmitWord()
     }
 
     /*
