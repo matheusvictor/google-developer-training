@@ -1,23 +1,23 @@
 package com.example.android.unscramble.ui.game
 
 import android.util.Log
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 
 class GameViewModel : ViewModel() {
 
-    private var _score = 0
-    val score: Int get() = _score
+    private val _score: MutableLiveData<Int> = MutableLiveData(0)
+    val score: LiveData<Int> get() = _score
 
-    private var _currentWordCount = 0
-    val currentWordCount: Int get() = _currentWordCount
+    private val _currentWordCount: MutableLiveData<Int> = MutableLiveData(0)
+    val currentWordCount: LiveData<Int> get() = _currentWordCount
 
-    private lateinit var _currentScrambledWord: String
-    val currentScrambleWord: String get() = _currentScrambledWord
-
-    private lateinit var _currentWord: String
-    val currentWord: String get() = _currentWord
+    private val _currentScrambledWord = MutableLiveData<String>()
+    val currentScrambleWord: LiveData<String> get() = _currentScrambledWord
 
     private var wordList: MutableList<String> = mutableListOf()
+    private lateinit var currentWord: String
 
     init {
         Log.d("GameFragment", "GameViewModel created!")
@@ -30,38 +30,44 @@ class GameViewModel : ViewModel() {
     }
 
     private fun getNextWord() {
-        _currentWord = allWordsList.random()
-
-        val tempWord = _currentWord.toCharArray()
+        currentWord = allWordsList.random()
+        val tempWord = currentWord.toCharArray()
         tempWord.shuffle()
-        while (String(tempWord).equals(_currentWord, false)) {
+
+        while (String(tempWord).equals(currentWord, false)) {
             tempWord.shuffle()
         }
-        if (wordList.contains(_currentWord)) getNextWord()
+        if (wordList.contains(currentWord)) getNextWord()
         else {
-            _currentScrambledWord = String(tempWord)
-            ++_currentWordCount
-            wordList.add(_currentWord)
+            _currentScrambledWord.value = String(tempWord)
+            _currentWordCount.value = (_currentWordCount.value)?.inc()
+            wordList.add(currentWord)
         }
     }
 
     fun canSkipToNextWord(): Boolean {
-        return if (currentWordCount < MAX_NO_OF_WORDS) {
+        return if (currentWordCount.value!! < MAX_NO_OF_WORDS) {
             getNextWord()
             true
         } else false
     }
 
     private fun increaseScore() {
-        _score += SCORE_INCREASE
+        _score.value = (_score.value)?.plus(SCORE_INCREASE)
     }
 
     fun isUserWordCorrect(word: String): Boolean {
-        if (word.equals(_currentWord, ignoreCase = true)) {
+        if (word.equals(currentWord, ignoreCase = true)) {
             increaseScore()
             return true
         }
         return false
     }
 
+    fun reinitializeData() {
+        _score.value = 0
+        _currentWordCount.value = 0
+        wordList.clear()
+        getNextWord()
+    }
 }
